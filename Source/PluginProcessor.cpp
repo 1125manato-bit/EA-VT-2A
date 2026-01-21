@@ -179,16 +179,13 @@ void Vt2aAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   // Downsample back
   oversampling->processSamplesDown(block);
 
-  // === Output gain compensation (prevent excessive loudness) ===
-  float outputCompensation = 1.0f / (1.0f + normalizedDrive * 0.3f);
-  buffer.applyGain(outputCompensation);
-
   // === Mix: Blend dry and wet signals ===
+  // Mix=0: 100% dry, Mix=1: 100% wet
   for (int ch = 0; ch < totalNumInputChannels; ++ch) {
     auto *wet = buffer.getWritePointer(ch);
     auto *dry = dryBuffer.getReadPointer(ch);
     for (int i = 0; i < numSamples; ++i) {
-      wet[i] = dry[i] + (wet[i] - dry[i]) * mixParam;
+      wet[i] = dry[i] * (1.0f - mixParam) + wet[i] * mixParam;
     }
   }
 }
