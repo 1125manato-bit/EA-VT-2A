@@ -7,10 +7,8 @@ Vt2aAudioProcessorEditor::Vt2aAudioProcessorEditor(Vt2aAudioProcessor &p)
       BinaryData::background_jpg, BinaryData::background_jpgSize);
 
   // Drive Slider
+  // Drive Slider
   driveSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-  driveSlider.setRotaryParameters(
-      -135.0f * juce::MathConstants<float>::pi / 180.0f,
-      135.0f * juce::MathConstants<float>::pi / 180.0f, true);
   driveSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
   driveSlider.setPopupDisplayEnabled(true, false, this);
   driveSlider.setLookAndFeel(&lnf);
@@ -19,12 +17,12 @@ Vt2aAudioProcessorEditor::Vt2aAudioProcessorEditor(Vt2aAudioProcessor &p)
   driveAttachment =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
           audioProcessor.apvts, "DRIVE", driveSlider);
+  driveSlider.setRotaryParameters(-3.0f * juce::MathConstants<float>::pi / 4.0f,
+                                  3.0f * juce::MathConstants<float>::pi / 4.0f,
+                                  true);
 
   // Mix Slider
   mixSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-  mixSlider.setRotaryParameters(
-      -135.0f * juce::MathConstants<float>::pi / 180.0f,
-      135.0f * juce::MathConstants<float>::pi / 180.0f, true);
   mixSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
   mixSlider.setPopupDisplayEnabled(true, false, this);
   mixSlider.setLookAndFeel(&lnf);
@@ -33,6 +31,9 @@ Vt2aAudioProcessorEditor::Vt2aAudioProcessorEditor(Vt2aAudioProcessor &p)
   mixAttachment =
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
           audioProcessor.apvts, "MIX", mixSlider);
+  mixSlider.setRotaryParameters(-3.0f * juce::MathConstants<float>::pi / 4.0f,
+                                3.0f * juce::MathConstants<float>::pi / 4.0f,
+                                true);
 
   setSize(1024, 866);
 }

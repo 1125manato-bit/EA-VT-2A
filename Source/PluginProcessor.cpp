@@ -146,9 +146,9 @@ void Vt2aAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   oversampling->processSamplesDown(block);
 
   // Mix (Constant Power)
-  float angle = mixParam * (juce::MathConstants<float>::pi * 0.5f);
-  float wetGain = std::sin(angle);
-  float dryGain = std::cos(angle);
+  float mixAngle = mixParam * juce::MathConstants<float>::halfPi;
+  float dryGain = std::cos(mixAngle);
+  float wetGain = std::sin(mixAngle);
 
   for (int i = 0; i < totalNumInputChannels; ++i) {
     buffer.applyGain(i, 0, numSamples, wetGain);
