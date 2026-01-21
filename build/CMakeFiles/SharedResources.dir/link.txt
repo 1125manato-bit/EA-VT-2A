@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSharedResources.a CMakeFiles/SharedResources.dir/juce_binarydata_SharedResources/JuceLibraryCode/BinaryData1.cpp.o CMakeFiles/SharedResources.dir/juce_binarydata_SharedResources/JuceLibraryCode/BinaryData2.cpp.o
-/usr/bin/ranlib libSharedResources.a

@@ -1,3 +1,0 @@
-/Users/manato/.gemini/antigravity/scratch/VT-2A/build/_deps/juce-subbuild/CMakeFiles/juce-populate.dir
-/Users/manato/.gemini/antigravity/scratch/VT-2A/build/_deps/juce-subbuild/CMakeFiles/edit_cache.dir
-/Users/manato/.gemini/antigravity/scratch/VT-2A/build/_deps/juce-subbuild/CMakeFiles/rebuild_cache.dir
