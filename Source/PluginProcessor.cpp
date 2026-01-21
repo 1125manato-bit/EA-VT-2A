@@ -67,6 +67,9 @@ void Vt2aAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
       osSpec.sampleRate, 10.0f);
 
   dryBuffer.setSize(getTotalNumOutputChannels(), samplesPerBlock);
+
+  dryDelayLine.prepare(spec);
+  dryDelayLine.setMaximumDelayInSamples(1024);
 }
 
 void Vt2aAudioProcessor::releaseResources() {}
@@ -99,11 +102,19 @@ void Vt2aAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   float mixParam = *apvts.getRawParameterValue("MIX") / 100.0f;
   float normalizedDrive = driveParam / 100.0f;
 
-  // Wet/Dry logic (Copy dry)
+  // Wet/Dry logic (Copy dry and delay to match Oversampling latency)
   if (dryBuffer.getNumSamples() < numSamples)
     dryBuffer.setSize(totalNumInputChannels, numSamples);
-  for (int i = 0; i < totalNumInputChannels; ++i)
-    dryBuffer.copyFrom(i, 0, buffer, i, 0, numSamples);
+
+  auto latency = oversampling->getLatencyInSamples();
+  for (int i = 0; i < totalNumInputChannels; ++i) {
+    auto *dryData = dryBuffer.getWritePointer(i);
+    auto *inData = buffer.getReadPointer(i);
+    for (int s = 0; s < numSamples; ++s) {
+      dryDelayLine.pushSample(i, inData[s]);
+      dryData[s] = dryDelayLine.popSample(i, latency);
+    }
+  }
 
   // Filter Updates (Oversampled Rate)
   float osRate = getSampleRate() * oversampling->getOversamplingFactor();
