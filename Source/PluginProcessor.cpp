@@ -67,9 +67,6 @@ void Vt2aAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
       osSpec.sampleRate, 10.0f);
 
   dryBuffer.setSize(getTotalNumOutputChannels(), samplesPerBlock);
-
-  dryDelayLine.prepare(spec);
-  dryDelayLine.setMaximumDelayInSamples(1024);
 }
 
 void Vt2aAudioProcessor::releaseResources() {}
@@ -102,19 +99,11 @@ void Vt2aAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   float mixParam = *apvts.getRawParameterValue("MIX") / 100.0f;
   float normalizedDrive = driveParam / 100.0f;
 
-  // Wet/Dry logic (Copy dry and delay to match Oversampling latency)
+  // Wet/Dry logic (Copy dry)
   if (dryBuffer.getNumSamples() < numSamples)
     dryBuffer.setSize(totalNumInputChannels, numSamples);
-
-  auto latency = oversampling->getLatencyInSamples();
-  for (int i = 0; i < totalNumInputChannels; ++i) {
-    auto *dryData = dryBuffer.getWritePointer(i);
-    auto *inData = buffer.getReadPointer(i);
-    for (int s = 0; s < numSamples; ++s) {
-      dryDelayLine.pushSample(i, inData[s]);
-      dryData[s] = dryDelayLine.popSample(i, latency);
-    }
-  }
+  for (int i = 0; i < totalNumInputChannels; ++i)
+    dryBuffer.copyFrom(i, 0, buffer, i, 0, numSamples);
 
   // Filter Updates (Oversampled Rate)
   float osRate = getSampleRate() * oversampling->getOversamplingFactor();
@@ -156,14 +145,16 @@ void Vt2aAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 
   oversampling->processSamplesDown(block);
 
-  // Mix (Constant Power)
-  float mixAngle = mixParam * juce::MathConstants<float>::halfPi;
-  float dryGain = std::cos(mixAngle);
-  float wetGain = std::sin(mixAngle);
-
-  for (int i = 0; i < totalNumInputChannels; ++i) {
-    buffer.applyGain(i, 0, numSamples, wetGain);
-    buffer.addFrom(i, 0, dryBuffer, i, 0, numSamples, dryGain);
+  // Mix: Blend dry and wet signals
+  // At Mix=0: output = dry
+  // At Mix=1: output = wet
+  // Use: output = dry + (wet - dry) * mix = dry * (1-mix) + wet * mix
+  for (int ch = 0; ch < totalNumInputChannels; ++ch) {
+    auto *wet = buffer.getWritePointer(ch);
+    auto *dry = dryBuffer.getReadPointer(ch);
+    for (int i = 0; i < numSamples; ++i) {
+      wet[i] = dry[i] + (wet[i] - dry[i]) * mixParam;
+    }
   }
 }
 

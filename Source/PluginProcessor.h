@@ -55,9 +55,8 @@ private:
                                  juce::dsp::IIR::Coefficients<float>>
       dcBlocker;
 
-  // Dry Buffer and Delay for Mix alignment
+  // Dry Buffer for Mix
   juce::AudioBuffer<float> dryBuffer;
-  juce::dsp::DelayLine<float> dryDelayLine;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Vt2aAudioProcessor)
 };
