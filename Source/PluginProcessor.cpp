@@ -179,6 +179,11 @@ void Vt2aAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   // Downsample back
   oversampling->processSamplesDown(block);
 
+  // === Makeup gain to compensate for saturation level loss ===
+  // tanh and compression reduce level, so we boost it back
+  float makeupGain = 1.0f + normalizedDrive * 0.5f;
+  buffer.applyGain(makeupGain);
+
   // === Mix: Blend dry and wet signals ===
   // Mix=0: 100% dry, Mix=1: 100% wet
   for (int ch = 0; ch < totalNumInputChannels; ++ch) {
